@@ -9,7 +9,7 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
 
-  <name>A Camel Route</name>
+  <name>Camel Salesforce on Heroku</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -95,19 +95,26 @@
           <version>2.19.0</version>
       </plugin>
 
-      <!-- Heroku copy dependencies -->
+      <!-- Maven creates target -->
       <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals><goal>copy-dependencies</goal></goals>
-                    </execution>
-                </executions>
-       </plugin>
+        <groupId>org.codehaus.mojo</groupId>
+          <artifactId>appassembler-maven-plugin</artifactId>
+          <version>1.1.1</version>
+          <configuration> 
+            <assembleDirectory>target</assembleDirectory> 
+            <programs>
+                <program>
+                    <mainClass>com.dreamforce17.herokucamel.MainApp</mainClass>
+                    <name>worker</name>
+                </program>
+            </programs>
+          </configuration>
+          <executions>
+              <execution>
+                  <phase>package</phase><goals><goal>assemble</goal></goals>
+              </execution>            
+          </executions>
+      </plugin>
 
     </plugins>
   </build>
