@@ -4,6 +4,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.salesforce.SalesforceComponent;
+import org.apache.camel.component.weather.WeatherComponent;
 import org.apache.camel.impl.DefaultCamelContext;
 
 public class MainApp {
@@ -22,15 +23,18 @@ public class MainApp {
 		
 		context.addRoutes(new RouteBuilder() {
 			public void configure() {
-				from("direct:toSalesforce")
-					.to("salesforce:limits")
-					.process(new SalesforceProcessor());
+				from("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
+					.process(new TelegrammProcessor())
+					.to("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM");
+				//from("direct:toSalesforce")
+				//	.to("salesforce:limits")
+				//	.process(new SalesforceProcessor());
 			}
 		});
 		context.start();
-		ProducerTemplate producerTemplate = context.createProducerTemplate();
-		producerTemplate.sendBody("direct:toSalesforce", "Start route");
-		Thread.sleep(10000);
+		//ProducerTemplate producerTemplate = context.createProducerTemplate();
+		//producerTemplate.sendBody("direct:toSalesforce", "Start route");
+		Thread.sleep(100000);
 		context.stop();
 	}
 }
