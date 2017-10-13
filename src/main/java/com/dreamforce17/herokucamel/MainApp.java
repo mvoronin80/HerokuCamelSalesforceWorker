@@ -120,7 +120,6 @@ public class MainApp {
 							newCase.setContactId(contact.getId());
 							newCase.setTelegram_Chat_Id__c(chatId);
 							newCase.setSubject((String)exchange.getIn().getHeader("TelegramRequest"));
-							newCase.setPriority(highTemperature ? Case_PriorityEnum.HIGH : Case_PriorityEnum.LOW);
 							exchange.getIn().setBody(newCase);
 						}
 					})
