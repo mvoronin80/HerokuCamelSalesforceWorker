@@ -51,7 +51,7 @@ public class MainApp {
 							exchange.getIn().setBody(messageOut);
 						}
 					})
-					.to("telegram:bots/359951231:AAEsctrys2UgXp-duLa9sPkLvESPCmiJ1Nc")
+					.to("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
 				;
 				
 		
@@ -62,7 +62,7 @@ public class MainApp {
 				/*
 				 * Take incoming message from telegram
 				 * */
-				from("telegram:bots/359951231:AAEsctrys2UgXp-duLa9sPkLvESPCmiJ1Nc")
+				from("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
 					
 					/*
 					 * Save text of the message to message header
@@ -106,6 +106,43 @@ public class MainApp {
 					//.filter(e -> e.getIn().getBody(QueryRecordsContact.class).getRecords().size() == 1)
 					//.setHeader("Contact", bodyAs(QueryRecordsContact.class).getRecords().get(0))
 					
+					/*
+					 * If found Contact has city information code in the address - find weather for this address
+					 */
+					.choice()
+					
+						.when(new Predicate() {
+							@Override
+							public boolean matches(Exchange exchange) {
+								QueryRecordsContact foundContacts = exchange.getIn().getBody(QueryRecordsContact.class);
+								Contact contact = foundContacts.getRecords().get(0);
+								return contact.getMailingCity() != null;
+							}	
+						})
+						
+						/*
+						 * Request weather for the Contact location 
+						 * */
+						.toD("weather:get?location=${body.records[0].getMailingCity}&appid=b1a7b97da054ad4ca0730463120ce1ba")
+						
+						
+						/*
+						 * Saves temperature for the location
+						 * */
+						.process(new Processor() {
+							@Override
+							public void process(Exchange exchange) throws Exception {
+								ObjectMapper objectMapper = new ObjectMapper();
+								JsonNode weatherInfo = objectMapper.readTree(exchange.getIn().getBody(String.class));
+								Double temperature = weatherInfo.get("main").get("temp").asDouble();
+								exchange.getIn().setHeader("Temperature", temperature);
+							}				
+						})
+					
+					/*
+					 * End if
+					 */
+					.end()
 					
 					/*
 					 * Prepares the case to be created in Salesforce
@@ -115,11 +152,14 @@ public class MainApp {
 						public void process(Exchange exchange) throws Exception {
 							Contact contact = exchange.getIn().getHeader("Contact", Contact.class);
 							String chatId = exchange.getIn().getHeader("CamelTelegramChatId", String.class);
+							Double temperature = exchange.getIn().getHeader("Temperature", Double.class);
+							boolean highTemperature = (temperature != null) && (temperature.doubleValue() > 300);
 							
 							Case newCase = new Case();
 							newCase.setContactId(contact.getId());
 							newCase.setTelegram_Chat_Id__c(chatId);
 							newCase.setSubject((String)exchange.getIn().getHeader("TelegramRequest"));
+							newCase.setPriority(highTemperature ? Case_PriorityEnum.HIGH : Case_PriorityEnum.LOW);
 							exchange.getIn().setBody(newCase);
 						}
 					})
@@ -145,7 +185,7 @@ public class MainApp {
 					/*
 					 * Writes message back to user
 					 * */
-					.to("telegram:bots/359951231:AAEsctrys2UgXp-duLa9sPkLvESPCmiJ1Nc")
+					.to("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
 				;
 			}
 		});
