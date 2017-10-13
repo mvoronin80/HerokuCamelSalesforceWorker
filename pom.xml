@@ -8,8 +8,7 @@
   <artifactId>camel1</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-
-  <name>Camel Salesforce on Heroku</name>
+  <name>Camel with Salesforce on Heroku - worker</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -31,11 +30,6 @@
 
   <dependencies>
 
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-core</artifactId>
-    </dependency>
-
     <!-- logging -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -52,23 +46,21 @@
       <artifactId>log4j-slf4j-impl</artifactId>
       <scope>runtime</scope>
     </dependency>
+    
     <!-- add camel salesforce dependency -->
     <dependency>
     	<groupId>org.apache.camel</groupId>
     	<artifactId>camel-salesforce</artifactId>
-        <version>2.19.0</version>
     </dependency>
     <!-- add camel weather dependency -->
     <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-weather</artifactId>
-        <version>2.19.0</version>
     </dependency>
-    <!-- add camel telegramm dependency -->
+    <!-- add camel telegram dependency -->
     <dependency>
         <groupId>org.apache.camel</groupId>
         <artifactId>camel-telegram</artifactId>
-        <version>2.19.0</version>
     </dependency>
 
     <!-- testing -->
@@ -124,7 +116,10 @@
           </configuration>
           <executions>
               <execution>
-                  <phase>package</phase><goals><goal>assemble</goal></goals>
+                  <phase>package</phase>
+                  <goals>
+                  	<goal>assemble</goal>
+                  </goals>
               </execution>            
           </executions>
       </plugin>

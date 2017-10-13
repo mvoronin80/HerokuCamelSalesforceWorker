@@ -44,7 +44,6 @@ public class MainApp {
 					.process(new Processor() {
 						@Override
 						public void process(Exchange exchange) throws Exception {
-							// TODO Auto-generated method stub
 							Case updatedCase = exchange.getIn().getBody(Case.class);
 							OutgoingTextMessage messageOut = new OutgoingTextMessage();
 							messageOut.setText("Case id " + updatedCase.getId() + "is now \"" + updatedCase.getStatus() + "\"");
@@ -52,7 +51,7 @@ public class MainApp {
 							exchange.getIn().setBody(messageOut);
 						}
 					})
-					.to("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
+					.to("telegram:bots/359951231:AAEsctrys2UgXp-duLa9sPkLvESPCmiJ1Nc")
 				;
 				
 		
@@ -63,7 +62,7 @@ public class MainApp {
 				/*
 				 * Take incoming message from telegram
 				 * */
-				from("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
+				from("telegram:bots/359951231:AAEsctrys2UgXp-duLa9sPkLvESPCmiJ1Nc")
 					
 					/*
 					 * Save text of the message to message header
@@ -83,7 +82,7 @@ public class MainApp {
 					//.setHeader("TelegramRequest", bodyAs(String.class))
 					
 					/*
-					 * Lookup contact in Salesforce which FirstName and LastName equals Telegram message () 
+					 * Lookup contact in Salesforce which FirstName and LastName equals Telegram message 
 					 */
 					.toD("salesforce:query?sObjectQuery=SELECT Id, MailingCity FROM Contact WHERE FirstName=\'${body.from.firstName}\' AND LastName=\'${body.from.lastName}\'&sObjectClass=org.apache.camel.salesforce.dto.QueryRecordsContact")
 					
@@ -95,7 +94,8 @@ public class MainApp {
 						public boolean matches(Exchange exchange) {
 							QueryRecordsContact foundContacts = exchange.getIn().getBody(QueryRecordsContact.class);
 							boolean filterResult = foundContacts.getRecords().size() == 1;
-							exchange.getIn().setHeader("Contact", foundContacts.getRecords().get(0));
+							if (filterResult)
+								exchange.getIn().setHeader("Contact", foundContacts.getRecords().get(0));
 							return filterResult;
 						}
 					})
@@ -104,44 +104,8 @@ public class MainApp {
 					 * Alternative way to filter message (use lambda) 
 					 * */
 					//.filter(e -> e.getIn().getBody(QueryRecordsContact.class).getRecords().size() == 1)
+					//.setHeader("Contact", bodyAs(QueryRecordsContact.class).getRecords().get(0))
 					
-					/*
-					 * If found Contact has zip code in the address - find weather for this address
-					 */
-					.choice()
-					
-						.when(new Predicate() {
-							@Override
-							public boolean matches(Exchange exchange) {
-								QueryRecordsContact foundContacts = exchange.getIn().getBody(QueryRecordsContact.class);
-								Contact contact = foundContacts.getRecords().get(0);
-								return contact.getMailingCity() != null;
-							}	
-						})
-						
-						/*
-						 * Request weather for the Contact location 
-						 * */
-						.toD("weather:get?location=${body.records[0].getMailingCity}&appid=b1a7b97da054ad4ca0730463120ce1ba")
-						
-						
-						/*
-						 * Saves temperature for the location
-						 * */
-						.process(new Processor() {
-							@Override
-							public void process(Exchange exchange) throws Exception {
-								ObjectMapper objectMapper = new ObjectMapper();
-								JsonNode weatherInfo = objectMapper.readTree(exchange.getIn().getBody(String.class));
-								Double temperature = weatherInfo.get("main").get("temp").asDouble();
-								exchange.getIn().setHeader("Temperature", temperature);
-							}				
-						})
-					
-					/*
-					 * End if
-					 */
-					.end()
 					
 					/*
 					 * Prepares the case to be created in Salesforce
@@ -151,8 +115,6 @@ public class MainApp {
 						public void process(Exchange exchange) throws Exception {
 							Contact contact = exchange.getIn().getHeader("Contact", Contact.class);
 							String chatId = exchange.getIn().getHeader("CamelTelegramChatId", String.class);
-							Double temperature = exchange.getIn().getHeader("Temperature", Double.class);
-							boolean highTemperature = (temperature != null) && (temperature.doubleValue() > 300);
 							
 							Case newCase = new Case();
 							newCase.setContactId(contact.getId());
@@ -184,7 +146,7 @@ public class MainApp {
 					/*
 					 * Writes message back to user
 					 * */
-					.to("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
+					.to("telegram:bots/359951231:AAEsctrys2UgXp-duLa9sPkLvESPCmiJ1Nc")
 				;
 			}
 		});
