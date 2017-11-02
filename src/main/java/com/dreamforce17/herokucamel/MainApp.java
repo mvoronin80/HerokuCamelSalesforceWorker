@@ -36,24 +36,6 @@ public class MainApp {
 		context.addRoutes(new RouteBuilder() {
 			public void configure() {
 				
-				/*
-				 * Route 2: update Telegram user with Salesforce updates
-				 * */
-				from("salesforce:ChangeCaseTopic?notifyForFields=SELECT&NotifyForOperationCreate=false&sObjectName=Case&updateTopic=true&sObjectQuery=SELECT Id, Status, Telegram_Chat_Id__c FROM Case WHERE Telegram_Chat_Id__c != NULL")
-					.log("Case ${body.getId} update with status \'${body.getStatus}\', chatId = ${body.getTelegram_Chat_Id__c}")
-					.process(new Processor() {
-						@Override
-						public void process(Exchange exchange) throws Exception {
-							Case updatedCase = exchange.getIn().getBody(Case.class);
-							OutgoingTextMessage messageOut = new OutgoingTextMessage();
-							messageOut.setText("Case id " + updatedCase.getId() + "is now \"" + updatedCase.getStatus() + "\"");
-							messageOut.setChatId(updatedCase.getTelegram_Chat_Id__c());
-							exchange.getIn().setBody(messageOut);
-						}
-					})
-					.to("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
-				;
-				
 		
 				/*
 				 * Route 1: convert incoming Telegram chat message to Salesforce case
@@ -62,7 +44,7 @@ public class MainApp {
 				/*
 				 * Take incoming message from telegram
 				 * */
-				from("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
+				from("telegram:bots/359951231:AAE3dmv5LB3tnUzeRpzJI8c7srBZi9wG55s")
 					
 					/*
 					 * Save text of the message to message header
@@ -185,13 +167,11 @@ public class MainApp {
 					/*
 					 * Writes message back to user
 					 * */
-					.to("telegram:bots/359951231:AAEr0BMcYe0TJIu2tFQ8xnAtAI8QHM8TBfM")
+					.to("telegram:bots/359951231:AAE3dmv5LB3tnUzeRpzJI8c7srBZi9wG55s")
 				;
 			}
 		});
 		context.start();
-		//ProducerTemplate producerTemplate = context.createProducerTemplate();
-		//producerTemplate.sendBody("direct:toSalesforce", "Start route");
-		Thread.sleep(10000000);
+		Thread.sleep(1000 * 60 * 24 * 7);
 	}
 }
