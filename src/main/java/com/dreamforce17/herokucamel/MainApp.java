@@ -135,7 +135,7 @@ public class MainApp {
 							Contact contact = exchange.getIn().getHeader("Contact", Contact.class);
 							String chatId = exchange.getIn().getHeader("CamelTelegramChatId", String.class);
 							Double temperature = exchange.getIn().getHeader("Temperature", Double.class);
-							boolean highTemperature = (temperature != null) && (temperature.doubleValue() > 300);
+							boolean highTemperature = (temperature != null) && (temperature.doubleValue() < 276);
 							
 							Case newCase = new Case();
 							newCase.setContactId(contact.getId());
