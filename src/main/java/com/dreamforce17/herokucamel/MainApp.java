@@ -25,10 +25,10 @@ public class MainApp {
 		
 		SalesforceComponent salesforce = new SalesforceComponent();
 		salesforce.setLoginUrl("https://login.salesforce.com");
-		salesforce.setClientSecret("5173328980735565452");
-		salesforce.setClientId("3MVG9g9rbsTkKnAWSZgZ2o8IVO7QrN3jOGz8gqLUKHcs40oAjLqcv9EaWJJ0baYCmctLWllvm7PIx_RP3V.zq");
-		salesforce.setPassword("Monitor-1234");
-		salesforce.setUserName("mv_df17@ds.com");
+		salesforce.setClientSecret("");
+		salesforce.setClientId("");
+		salesforce.setPassword("");
+		salesforce.setUserName("");
 		salesforce.setPackages("org.apache.camel.salesforce.dto");
 		
 		context.addComponent("salesforce", salesforce);
@@ -44,7 +44,7 @@ public class MainApp {
 				/*
 				 * Take incoming message from telegram
 				 * */
-				from("telegram:bots/359951231:AAE3dmv5LB3tnUzeRpzJI8c7srBZi9wG55s")
+				from("telegram:bots/12345")
 					
 					/*
 					 * Save text of the message to message header
@@ -105,7 +105,7 @@ public class MainApp {
 						/*
 						 * Request weather for the Contact location 
 						 * */
-						.toD("weather:get?location=${body.records[0].getMailingCity}&appid=b1a7b97da054ad4ca0730463120ce1ba")
+						.toD("weather:get?location=${body.records[0].getMailingCity}&appid=12345")
 						
 						
 						/*
@@ -167,7 +167,7 @@ public class MainApp {
 					/*
 					 * Writes message back to user
 					 * */
-					.to("telegram:bots/359951231:AAE3dmv5LB3tnUzeRpzJI8c7srBZi9wG55s")
+					.to("telegram:bots/12345")
 				;
 			}
 		});
